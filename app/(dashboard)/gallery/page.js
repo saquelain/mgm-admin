@@ -12,7 +12,7 @@ export default function GalleryPage() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/gallery');
+      const res = await api.get('/gallery/index.php');
       setCategories(res.data);
     } catch (err) {
       console.error(err);
@@ -29,7 +29,7 @@ export default function GalleryPage() {
     e.preventDefault();
     setCreating(true);
     try {
-      await api.post('/gallery', { title, date });
+      await api.post('/gallery/index.php', { title, date });
       setTitle('');
       setDate('');
       fetchCategories();
@@ -43,10 +43,10 @@ export default function GalleryPage() {
   const handleUploadPhotos = async (categoryId, files) => {
     const formData = new FormData();
     for (const file of files) {
-      formData.append('photos', file);
+      formData.append('photos[]', file);
     }
     try {
-      await api.post(`/gallery/${categoryId}/photos`, formData, {
+      await api.post(`/gallery/photos.php?category_id=${categoryId}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       fetchCategories();
@@ -58,7 +58,7 @@ export default function GalleryPage() {
   const handleDeletePhoto = async (categoryId, photoId) => {
     if (!confirm('Delete this photo?')) return;
     try {
-      await api.delete(`/gallery/${categoryId}/photos/${photoId}`);
+      await api.delete(`/gallery/delete-photo.php?photo_id=${photoId}`);
       fetchCategories();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete photo');
@@ -68,7 +68,7 @@ export default function GalleryPage() {
   const handleDeleteCategory = async (categoryId) => {
     if (!confirm('Delete this entire category and all its photos?')) return;
     try {
-      await api.delete(`/gallery/${categoryId}`);
+      await api.delete(`/gallery/delete-category.php?category_id=${categoryId}`);
       fetchCategories();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete category');

@@ -21,7 +21,7 @@ export default function NoticesPage() {
   const fetchNotices = async (type) => {
     setLoading(true);
     try {
-      const res = await api.get('/notices', { params: { type } });
+      const res = await api.get('/notices/index.php', { params: { type } });
       setNotices(res.data);
     } catch (err) {
       console.error(err);
@@ -46,7 +46,7 @@ export default function NoticesPage() {
     if (file) formData.append('file', file);
 
     try {
-      await api.post('/notices', formData, {
+      await api.post('/notices/index.php', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setTitle('');
@@ -64,7 +64,7 @@ export default function NoticesPage() {
   const handleDelete = async (id) => {
     if (!confirm('Delete this entry?')) return;
     try {
-      await api.delete(`/notices/${id}`);
+      await api.delete(`/notices/delete.php?id=${id}`);
       fetchNotices(activeType);
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to delete');

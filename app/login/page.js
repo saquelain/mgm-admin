@@ -18,7 +18,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await api.post('/auth/login', { username, password });
+      const res = await api.post('/auth/login.php', { username, password });
       setAuth(res.data.token, res.data.admin);
       router.push('/');
     } catch (err) {
