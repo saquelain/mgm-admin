@@ -10,6 +10,7 @@ const links = [
   { href: '/courses', label: 'Courses' },
   { href: '/students', label: 'Students' },
   { href: '/faculty', label: 'Faculty & Staff' },
+  { href: '/admissions', label: 'Admissions' },
 ];
 
 export default function Sidebar() {
