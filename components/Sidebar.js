@@ -7,6 +7,7 @@ const links = [
   { href: '/', label: 'Dashboard' },
   { href: '/gallery', label: 'Gallery' },
   { href: '/notices', label: 'Notices' },
+  { href: '/courses', label: 'Courses' },
 ];
 
 export default function Sidebar() {
