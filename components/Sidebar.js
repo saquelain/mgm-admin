@@ -11,6 +11,7 @@ const links = [
   { href: '/students', label: 'Students' },
   { href: '/faculty', label: 'Faculty & Staff' },
   { href: '/admissions', label: 'Admissions' },
+  { href: '/committees', label: 'Committees' },
 ];
 
 export default function Sidebar() {
