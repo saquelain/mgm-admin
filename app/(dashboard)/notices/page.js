@@ -3,13 +3,17 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 
 const TYPES = [
-  { value: 'notice', label: 'Notices' },
-  { value: 'result', label: 'Results' },
   { value: 'class-notice', label: 'Class Notices' },
+  { value: 'result', label: 'Results' },
+];
+
+const RESULT_TAGS = [
+  { value: 'ug', label: 'UG' },
+  { value: 'pg', label: 'PG' },
 ];
 
 export default function NoticesPage() {
-  const [activeType, setActiveType] = useState('notice');
+  const [activeType, setActiveType] = useState('class-notice');
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState('');
@@ -31,11 +35,18 @@ export default function NoticesPage() {
   };
 
   useEffect(() => {
+    setTag(''); // reset tag when switching tabs so a stale UG/PG or text value doesn't carry over
     fetchNotices(activeType);
   }, [activeType]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
+
+    if (activeType === 'result' && !tag) {
+      alert('Please select UG or PG');
+      return;
+    }
+
     setCreating(true);
 
     const formData = new FormData();
@@ -115,16 +126,34 @@ export default function NoticesPage() {
               required
             />
           </div>
-          <div>
-            <label className="block text-xs font-medium mb-1">Tag (optional)</label>
-            <input
-              type="text"
-              value={tag}
-              onChange={(e) => setTag(e.target.value)}
-              placeholder="Important"
-              className="border rounded px-3 py-2 text-sm"
-            />
-          </div>
+
+          {activeType === 'result' ? (
+            <div>
+              <label className="block text-xs font-medium mb-1">Category</label>
+              <select
+                value={tag}
+                onChange={(e) => setTag(e.target.value)}
+                className="border rounded px-3 py-2 text-sm"
+                required
+              >
+                <option value="" disabled>Select UG/PG</option>
+                {RESULT_TAGS.map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-medium mb-1">Tag (optional)</label>
+              <input
+                type="text"
+                value={tag}
+                onChange={(e) => setTag(e.target.value)}
+                placeholder="Important"
+                className="border rounded px-3 py-2 text-sm"
+              />
+            </div>
+          )}
         </div>
         <div className="flex gap-3 items-end">
           <div>
@@ -159,7 +188,7 @@ export default function NoticesPage() {
                 <p className="text-sm font-medium">{notice.title}</p>
                 <p className="text-xs text-gray-500">
                   {notice.date}
-                  {notice.tag && ` · ${notice.tag}`}
+                  {notice.tag && ` · ${notice.tag.toUpperCase()}`}
                 </p>
                 {notice.fileUrl && (
                   <a
