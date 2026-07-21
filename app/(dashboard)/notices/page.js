@@ -108,10 +108,9 @@ export default function NoticesPage() {
           <div>
             <label className="block text-xs font-medium mb-1">Date</label>
             <input
-              type="text"
+              type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              placeholder="2026-07-15"
               className="border rounded px-3 py-2 text-sm"
               required
             />
