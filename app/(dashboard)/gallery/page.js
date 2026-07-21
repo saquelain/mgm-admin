@@ -8,6 +8,7 @@ export default function GalleryPage() {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [creating, setCreating] = useState(false);
+  const [uploadingCategoryId, setUploadingCategoryId] = useState(null); // NEW
 
   const fetchCategories = async () => {
     setLoading(true);
@@ -41,6 +42,7 @@ export default function GalleryPage() {
   };
 
   const handleUploadPhotos = async (categoryId, files) => {
+    setUploadingCategoryId(categoryId); // NEW
     const formData = new FormData();
     for (const file of files) {
       formData.append('photos[]', file);
@@ -52,16 +54,8 @@ export default function GalleryPage() {
       fetchCategories();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to upload photos');
-    }
-  };
-
-  const handleDeletePhoto = async (categoryId, photoId) => {
-    if (!confirm('Delete this photo?')) return;
-    try {
-      await api.delete(`/gallery/delete-photo.php?photo_id=${photoId}`);
-      fetchCategories();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete photo');
+    } finally {
+      setUploadingCategoryId(null); // NEW
     }
   };
 
@@ -94,7 +88,7 @@ export default function GalleryPage() {
         <div>
           <label className="block text-xs font-medium mb-1">Date</label>
           <input
-            type="text"
+            type="month"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             placeholder="e.g. July 2026"
@@ -118,53 +112,72 @@ export default function GalleryPage() {
         <p className="text-sm text-gray-500">No categories yet.</p>
       ) : (
         <div className="space-y-4">
-          {categories.map((cat) => (
-            <div key={cat._id} className="bg-white border rounded p-4">
-              <div className="flex justify-between items-start mb-3">
-                <div>
-                  <h3 className="font-medium">{cat.title}</h3>
-                  <p className="text-xs text-gray-500">{cat.date}</p>
-                </div>
-                <button
-                  onClick={() => handleDeleteCategory(cat._id)}
-                  className="text-xs text-red-600 hover:underline"
-                >
-                  Delete Category
-                </button>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-3">
-                {cat.photos.map((photo) => (
-                  <div key={photo._id} className="relative group">
-                    <img
-                      src={photo.url}
-                      alt={photo.caption}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                    <button
-                      onClick={() => handleDeletePhoto(cat._id, photo._id)}
-                      className="absolute top-0 right-0 bg-red-600 text-white text-xs w-5 h-5 rounded-full opacity-0 group-hover:opacity-100"
-                    >
-                      ✕
-                    </button>
+          {categories.map((cat) => {
+            const isUploading = uploadingCategoryId === cat._id; // NEW
+            return (
+              <div key={cat._id} className="bg-white border rounded p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-medium">{cat.title}</h3>
+                    <p className="text-xs text-gray-500">{cat.date}</p>
                   </div>
-                ))}
-              </div>
+                  <button
+                    onClick={() => handleDeleteCategory(cat._id)}
+                    className="text-xs text-red-600 hover:underline"
+                  >
+                    Delete Category
+                  </button>
+                </div>
 
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files.length > 0) {
-                    handleUploadPhotos(cat._id, e.target.files);
-                    e.target.value = '';
-                  }
-                }}
-                className="text-xs"
-              />
-            </div>
-          ))}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {cat.photos.map((photo) => (
+                    <div key={photo._id} className="relative group">
+                      <img
+                        src={photo.url}
+                        alt={photo.caption}
+                        className="w-20 h-20 object-cover rounded"
+                      />
+                      <button
+                        onClick={() => handleDeletePhoto(cat._id, photo._id)}
+                        className="absolute top-0 right-0 bg-red-600 text-white text-xs w-5 h-5 rounded-full opacity-0 group-hover:opacity-100"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+
+                  {/* NEW: skeleton placeholder tile while uploading */}
+                  {isUploading && (
+                    <div className="w-20 h-20 rounded bg-gray-100 border flex items-center justify-center">
+                      <svg className="animate-spin h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    disabled={isUploading} // NEW: prevent double-submit
+                    onChange={(e) => {
+                      if (e.target.files.length > 0) {
+                        handleUploadPhotos(cat._id, e.target.files);
+                        e.target.value = '';
+                      }
+                    }}
+                    className="text-xs disabled:opacity-50"
+                  />
+                  {isUploading && (
+                    <span className="text-xs text-gray-500">Uploading...</span> // NEW
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
