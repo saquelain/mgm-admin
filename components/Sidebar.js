@@ -8,6 +8,7 @@ const links = [
   { href: '/gallery', label: 'Gallery' },
   { href: '/notices', label: 'Notices' },
   { href: '/courses', label: 'Courses' },
+  { href: '/students', label: 'Students' },
 ];
 
 export default function Sidebar() {
